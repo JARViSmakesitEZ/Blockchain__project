@@ -1,0 +1,42 @@
+$ npx truffle migrate
+
+Compiling your contracts...
+===========================
+> Compiling .\contracts\Payment.sol
+> Artifacts written to C:\Users\ghosh\Desktop\E-PAYMENT BLOCKCHAIN\test\build\contracts
+> Compiled successfully using:
+   - solc: 0.8.0+commit.c7dfd78e.Emscripten.clang
+
+
+Starting migrations...
+======================
+> Network name:    'development'
+> Network id:      5777
+> Block gas limit: 6721975 (0x6691b7)
+
+
+2-deploy_contract.js
+====================
+
+   Deploying 'TimedTransaction'
+   ----------------------------
+   > transaction hash:    0xae91ae1e2d6cb53ac88f52529cb03510058691ec63b1b7ac4599735583991d72
+   > Blocks: 0            Seconds: 0
+   > contract address:    0xA32018822a5D13AfAF584f9c7EB81086132ec5D7
+   > block number:        1
+   > block timestamp:     1728966547
+   > account:             0x8C5500fe500d98219266Da01E8f93EBaB72624d0
+   > balance:             99.997748662375
+   > gas used:            667063 (0xa2db7)
+   > gas price:           3.375 gwei
+   > value sent:          0 ETH
+   > total cost:          0.002251337625 ETH
+
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:      0.002251337625 ETH
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.002251337625 ETH
