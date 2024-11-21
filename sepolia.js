@@ -1,16 +1,22 @@
 const path = require("path");
-let { Web3 } = require("web3");
-let web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
+const { Web3 } = require("web3");
 const { BN } = require("web3").utils;
+const fs = require("fs");
+require("dotenv").config(); // For loading sensitive data like private keys and Infura URL
 
-// Module 1: Smart Contract Module
+// Load the Infura provider for Sepolia
+const infuraUrl = `https://sepolia.infura.io/v3/37f179ba5c2e4b0bae285174702a3bba`;
+const web3 = new Web3(new Web3.providers.HttpProvider(infuraUrl));
+
 const contractJSON = require(path.resolve(
   __dirname,
   "./build/contracts/BatchingTransaction.json"
 ));
-const contractABI = contractJSON.abi;
-const contractAddress = "0x442CB91D9b417a80632b19C515d55f675deE21d3";
 
+const contractABI = contractJSON.abi;
+const contractAddress = "0x2711282334cFd2dc6b48C0Bc7d5A8D99cac1355A";
+
+// Module 1: Smart Contract Module
 async function loadContract() {
   return new web3.eth.Contract(contractABI, contractAddress);
 }
@@ -54,7 +60,7 @@ async function approveMilestoneBySeller(contract, sellerAddress, milestoneIdx) {
   try {
     await contract.methods
       .approveMilestoneBySeller(milestoneIdx)
-      .send({ from: sellerAddress, gas: 500000 });
+      .send({ from: sellerAddress });
     console.log(`Seller has approved milestone ${milestoneIdx + 1}`);
   } catch (error) {
     console.error(`Error approving milestone ${milestoneIdx}:`, error);
@@ -66,12 +72,32 @@ async function completeMilestone(contract, sellerAddress, milestoneIdx) {
     // Call the public wrapper function that internally calls the internal function
     await contract.methods
       .completeMilestoneWrapper(milestoneIdx)
-      .send({ from: sellerAddress, gas: 500000 });
+      .send({ from: sellerAddress });
     console.log(`Milestone ${milestoneIdx + 1} completed successfully.`);
     return true;
   } catch (error) {
     console.error("Error completing milestone:", error);
     return false;
+  }
+}
+
+// Function to fetch and log the contract's balance
+async function logContractBalance(contract, flag) {
+  const contractBalance = await web3.eth.getBalance(contract.options.address);
+  if (flag == 1) {
+    console.log(
+      `Contract Balance after milestone completion: ${web3.utils.fromWei(
+        contractBalance,
+        "ether"
+      )} ETH`
+    );
+  } else {
+    console.log(
+      `Amount to be refunded: ${web3.utils.fromWei(
+        contractBalance,
+        "ether"
+      )} ETH`
+    );
   }
 }
 
@@ -91,7 +117,7 @@ async function depositFunds(contract, buyerAddress, amount) {
 async function initiateRefund(contract, buyerAddress) {
   try {
     // Ensure buyerAddress is the address of the buyer in the smart contract
-    await contract.methods.refund().send({ from: buyerAddress, gas: 500000 });
+    await contract.methods.refund().send({ from: buyerAddress });
     console.log("Refund successful.");
   } catch (error) {
     console.error("Error refunding the amount to the buyer:", error);
@@ -129,6 +155,8 @@ async function delay(seconds) {
 async function main() {
   const contract = await loadContract();
   const accounts = await web3.eth.getAccounts();
+
+  // Use environment variables or directly add private key
   const buyerAddress = accounts[0];
   const sellerAddress = accounts[1];
   const paymentAmount = web3.utils.toWei("2", "ether");
@@ -175,10 +203,14 @@ async function main() {
       if (success) {
         milestoneIdx++;
         completed++;
+
+        // Step 6: Log the contract balance after milestone completion
+        await logContractBalance(contract, 1); // Added to show balance after each milestone
       }
     } else {
       console.log("Seller failed to do the job");
     }
+    console.log(" ");
   }
   console.log("----------------Seller Completing Milestones-----------------");
   // Step 6: Check for remaining milestones and initiate refund if necessary
@@ -188,7 +220,9 @@ async function main() {
   } else {
     console.log("  ");
     console.log("  ");
+
     console.log("----------------Refund Operation-----------------");
+    await logContractBalance(contract, 2);
 
     const incompleteMilestones =
       parseInt(milestonesCount.toString()) - completed;

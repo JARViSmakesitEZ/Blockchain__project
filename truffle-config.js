@@ -18,10 +18,22 @@ module.exports = {
         ),
       network_id: 420, // Optimism Goerli's network id
       gas: 10000000, // Adjusted gas limit for Layer 2
-      gasPrice: 1500000, // Gas price for Optimism Goerli (this may need to be adjusted)
+      gasPrice: 5000000, // Gas price for Optimism Goerli (this may need to be adjusted)
       confirmations: 2, // Number of confirmations to wait between deployments
       timeoutBlocks: 200, // Timeout for blocks before deployment fails
       skipDryRun: true, // Skip dry run before migration
+    },
+    sepolia: {
+      provider: () =>
+        new HDWalletProvider(
+          mnemonic,
+          `https://sepolia.infura.io/v3/37f179ba5c2e4b0bae285174702a3bba`
+        ),
+      network_id: 11155111, // Sepolia's network ID
+      gas: 20000000000, // Gas limit
+      confirmations: 2, // Number of confirmations to wait for
+      timeoutBlocks: 200, // Timeout for deployment
+      skipDryRun: true, // Skip dry-run before migrations
     },
   },
 

@@ -59,6 +59,7 @@ contract BatchingTransaction {
 
     // Buyer sends the full job amount upon contract deployment
     function deposit() external payable onlyBuyer {
+        require(msg.value > 0,"Deposit amount should be greater than zero");
         require(msg.value == totalJobAmount, "Incorrect total job amount sent");
         
         // Set the deadline based on the duration after deposit
@@ -75,9 +76,9 @@ contract BatchingTransaction {
         emit ApprovalReceived(milestoneIndex, msg.sender);
 
         // Check if both parties have approved to complete the milestone
-        if (milestone.buyerApproved && milestone.sellerApproved) {
-            completeMilestone(milestoneIndex);
-        }
+        // if (milestone.buyerApproved && milestone.sellerApproved) {
+        //     completeMilestone(milestoneIndex);
+        // }
     }
 
     // Approve milestone by seller
@@ -90,9 +91,9 @@ contract BatchingTransaction {
         emit ApprovalReceived(milestoneIndex, msg.sender);
 
         // Check if both parties have approved to complete the milestone
-        if (milestone.buyerApproved && milestone.sellerApproved) {
-            completeMilestone(milestoneIndex);
-        }
+        // if (milestone.buyerApproved && milestone.sellerApproved) {
+        //     completeMilestone(milestoneIndex);
+        // }
     }
 
     // Complete milestone once both approvals are met
@@ -111,6 +112,7 @@ contract BatchingTransaction {
 
     // The public/external wrapper for the internal function
     function completeMilestoneWrapper(uint milestoneIndex) external onlySeller milestoneExists(milestoneIndex) {
+        require(address(this).balance >= milestones[milestoneIndex].paymentAmount, "Insufficient contract balance for milestone completion.");
         require(milestones[milestoneIndex].buyerApproved && milestones[milestoneIndex].sellerApproved, "Both parties must approve to complete");
         completeMilestone(milestoneIndex);  // Call the internal function from the external function
     }
